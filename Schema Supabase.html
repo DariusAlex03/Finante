@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BaniBine — Schema bazei de date Supabase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f6f3ee; --surface: #fff; --ink: #211e1a; --muted: #8c857b;
+    --border: #ece7df; --accent: #d97757; --accent-dark: #c5613f;
+    --income: #2f9e6b; --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
+  .page { max-width: 880px; margin: 0 auto; padding: 48px 28px 80px; }
+
+  .doc-head { margin-bottom: 36px; }
+  .doc-head .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin: 0 0 10px; line-height: 1.15; }
+  .lede { font-size: 16px; color: var(--muted); margin: 0; max-width: 620px; }
+
+  h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.4px; margin: 44px 0 6px; }
+  h2 .num { color: var(--accent); font-family: var(--mono); margin-right: 8px; }
+  .h2-sub { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; margin-bottom: 16px; }
+
+  /* tabel definiție */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; padding: 0 12px 9px 0; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.col { font-family: var(--mono); font-weight: 600; font-size: 12.5px; white-space: nowrap; }
+  td.typ { font-family: var(--mono); font-size: 12px; color: var(--accent-dark); white-space: nowrap; }
+  td.desc { color: var(--muted); }
+  .pk { display: inline-block; font-size: 9.5px; font-weight: 800; background: #f3e3dd; color: var(--accent-dark); border-radius: 5px; padding: 1px 6px; margin-left: 7px; vertical-align: middle; letter-spacing: 0.5px; }
+  .fk { display: inline-block; font-size: 9.5px; font-weight: 800; background: #e4ebf2; color: #4a6f93; border-radius: 5px; padding: 1px 6px; margin-left: 7px; vertical-align: middle; letter-spacing: 0.5px; }
+
+  .table-title { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .table-title .name { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+  .table-title .dot { width: 10px; height: 10px; border-radius: 3px; }
+  .table-note { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+
+  /* cod SQL */
+  .code-wrap { position: relative; margin-bottom: 16px; }
+  pre {
+    background: #2a2520; color: #ede7de; border-radius: 14px; padding: 20px 22px;
+    overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; margin: 0;
+  }
+  pre .c { color: #9a8f80; }
+  pre .k { color: #e8a87c; }
+  pre .s { color: #a8c69f; }
+  .copy-btn {
+    position: absolute; top: 12px; right: 12px; padding: 7px 14px; border-radius: 9px; border: none;
+    background: rgba(255,255,255,.12); color: #ede7de; font-family: inherit; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: background .15s;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,.22); }
+
+  /* pași */
+  .steps { counter-reset: step; display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0;
+    font-family: var(--mono);
+  }
+  .step b { display: block; margin-bottom: 2px; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .step code { font-family: var(--mono); font-size: 12px; background: var(--bg); padding: 1px 6px; border-radius: 5px; color: var(--ink); }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .pill { font-family: var(--mono); font-size: 11.5px; font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 3px 11px; }
+
+  .callout { display: flex; gap: 12px; background: #f7efe0; border-radius: 13px; padding: 15px 17px; font-size: 13.5px; color: #7a5a1d; margin-bottom: 16px; }
+  .callout b { color: #5e4408; }
+
+  a.back { color: var(--accent); font-weight: 600; text-decoration: none; font-size: 13.5px; }
+  a.back:hover { text-decoration: underline; }
+
+  @media print {
+    body { background: #fff; }
+    .copy-btn { display: none; }
+    pre { white-space: pre-wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="doc-head">
+    <div class="kicker">BaniBine · Ghid tehnic</div>
+    <h1>Schema bazei de date Supabase</h1>
+    <p class="lede">Tabelele de care ai nevoie ca fiecare utilizator să-și vadă doar propriile date — cu SQL-ul gata de copiat în Supabase.</p>
+    <p style="margin-top:14px;"><a class="back" href="Autentificare.html">← Înapoi la autentificare</a></p>
+  </div>
+
+  <h2><span class="num">01</span>Pașii de configurare</h2>
+  <p class="h2-sub">De la zero la funcțional în ~5 minute.</p>
+  <div class="card">
+    <div class="steps">
+      <div class="step"><div><b>Creează proiectul</b><p>Intră pe <code>supabase.com</code> → New project. Alege o parolă pentru baza de date și regiunea <code>eu-central</code> (Frankfurt, cea mai aproape).</p></div></div>
+      <div class="step"><div><b>Rulează SQL-ul</b><p>În meniul din stânga: <code>SQL Editor</code> → New query → lipește scriptul complet de la secțiunea 03 → Run. Creează toate tabelele + regulile de securitate dintr-un foc.</p></div></div>
+      <div class="step"><div><b>Activează autentificarea pe email</b><p><code>Authentication → Sign In / Up</code> — Email e activat implicit. Pentru testare rapidă poți opri "Confirm email" (utilizatorii intră fără să confirme mailul).</p></div></div>
+      <div class="step"><div><b>Copiază cheile</b><p><code>Settings → API</code> → copiază <code>Project URL</code> și cheia <code>anon public</code>.</p></div></div>
+      <div class="step"><div><b>Pune-le în aplicație</b><p>Deschide fișierul <code>supabase-config.js</code> și completează cele două valori. Gata — pagina de autentificare va folosi conturi reale.</p></div></div>
+    </div>
+  </div>
+
+  <h2><span class="num">02</span>Tabelele</h2>
+  <p class="h2-sub">6 tabele, toate legate de utilizator prin <code style="font-family:var(--mono);font-size:12px;">user_id</code>. Supabase creează automat tabelul de conturi (<code style="font-family:var(--mono);font-size:12px;">auth.users</code>) — nu trebuie să-l faci tu.</p>
+
+  <div class="card">
+    <div class="table-title"><span class="dot" style="background:#d97757;"></span><span class="name">transactions</span></div>
+    <p class="table-note">Fiecare venit sau cheltuială — inima aplicației.</p>
+    <table>
+      <thead><tr><th>Coloană</th><th>Tip</th><th>Descriere</th></tr></thead>
+      <tbody>
+        <tr><td class="col">id<span class="pk">PK</span></td><td class="typ">uuid</td><td class="desc">generat automat</td></tr>
+        <tr><td class="col">user_id<span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">proprietarul (→ auth.users)</td></tr>
+        <tr><td class="col">type</td><td class="typ">text</td><td class="desc">doar <b>income</b> sau <b>expense</b></td></tr>
+        <tr><td class="col">amount</td><td class="typ">numeric(12,2)</td><td class="desc">suma în EUR, mereu pozitivă</td></tr>
+        <tr><td class="col">category</td><td class="typ">text</td><td class="desc">codul categoriei (vezi lista de mai jos)</td></tr>
+        <tr><td class="col">description</td><td class="typ">text</td><td class="desc">ex. „Cumpărături Lidl”</td></tr>
+        <tr><td class="col">date</td><td class="typ">date</td><td class="desc">data tranzacției</td></tr>
+        <tr><td class="col">created_at</td><td class="typ">timestamptz</td><td class="desc">completat automat</td></tr>
+      </tbody>
+    </table>
+    <p class="table-note" style="margin:14px 0 6px;">Coduri de categorie folosite de aplicație:</p>
+    <div class="pill-row">
+      <span class="pill">mancare</span><span class="pill">chirie</span><span class="pill">transport</span><span class="pill">distractie</span><span class="pill">cumparaturi</span><span class="pill">utilitati</span><span class="pill">sanatate</span><span class="pill">abonamente</span><span class="pill">altele</span><span class="pill">salariu</span><span class="pill">freelance</span><span class="pill">bonus</span><span class="pill">alt_venit</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-title"><span class="dot" style="background:#2f9e6b;"></span><span class="name">goals</span></div>
+    <p class="table-note">Obiectivele de economisire (fond de urgență, vacanță…).</p>
+    <table>
+      <thead><tr><th>Coloană</th><th>Tip</th><th>Descriere</th></tr></thead>
+      <tbody>
+        <tr><td class="col">id<span class="pk">PK</span></td><td class="typ">uuid</td><td class="desc">generat automat</td></tr>
+        <tr><td class="col">user_id<span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">proprietarul</td></tr>
+        <tr><td class="col">name</td><td class="typ">text</td><td class="desc">ex. „Vacanță Italia”</td></tr>
+        <tr><td class="col">target</td><td class="typ">numeric(12,2)</td><td class="desc">ținta în EUR</td></tr>
+        <tr><td class="col">saved</td><td class="typ">numeric(12,2)</td><td class="desc">cât ai strâns, pornește de la 0</td></tr>
+        <tr><td class="col">color</td><td class="typ">text</td><td class="desc">culoarea cardului, ex. #d97757</td></tr>
+        <tr><td class="col">deadline</td><td class="typ">date</td><td class="desc">termenul limită (opțional)</td></tr>
+        <tr><td class="col">created_at</td><td class="typ">timestamptz</td><td class="desc">automat</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="table-title"><span class="dot" style="background:#d9a456;"></span><span class="name">budgets</span></div>
+    <p class="table-note">Bugetul lunar pe categorie — un singur rând per categorie per utilizator.</p>
+    <table>
+      <thead><tr><th>Coloană</th><th>Tip</th><th>Descriere</th></tr></thead>
+      <tbody>
+        <tr><td class="col">id<span class="pk">PK</span></td><td class="typ">uuid</td><td class="desc">generat automat</td></tr>
+        <tr><td class="col">user_id<span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">proprietarul</td></tr>
+        <tr><td class="col">category</td><td class="typ">text</td><td class="desc">codul categoriei de cheltuieli</td></tr>
+        <tr><td class="col">amount</td><td class="typ">numeric(12,2)</td><td class="desc">limita lunară în EUR</td></tr>
+      </tbody>
+    </table>
+    <p class="table-note" style="margin-top:12px;">Constrângere: <code style="font-family:var(--mono);font-size:12px;">unique(user_id, category)</code> — nu poți avea două bugete pentru aceeași categorie.</p>
+  </div>
+
+  <div class="card">
+    <div class="table-title"><span class="dot" style="background:#6a8cae;"></span><span class="name">loans</span></div>
+    <p class="table-note">Banii dați împrumut — cui, cât și pentru ce.</p>
+    <table>
+      <thead><tr><th>Coloană</th><th>Tip</th><th>Descriere</th></tr></thead>
+      <tbody>
+        <tr><td class="col">id<span class="pk">PK</span></td><td class="typ">uuid</td><td class="desc">generat automat</td></tr>
+        <tr><td class="col">user_id<span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">proprietarul</td></tr>
+        <tr><td class="col">person</td><td class="typ">text</td><td class="desc">cui ai dat banii, ex. „Andrei”</td></tr>
+        <tr><td class="col">amount</td><td class="typ">numeric(12,2)</td><td class="desc">suma împrumutată</td></tr>
+        <tr><td class="col">note</td><td class="typ">text</td><td class="desc">ex. „până la salariu” (opțional)</td></tr>
+        <tr><td class="col">date</td><td class="typ">date</td><td class="desc">când ai dat banii</td></tr>
+        <tr><td class="col">created_at</td><td class="typ">timestamptz</td><td class="desc">automat</td></tr>
+      </tbody>
+    </table>
+    <p class="table-note" style="margin-top:12px;">Suma returnată <b>nu se stochează aici</b> — se calculează din plățile înregistrate în <code style="font-family:var(--mono);font-size:12px;">loan_payments</code>.</p>
+  </div>
+
+  <div class="card">
+    <div class="table-title"><span class="dot" style="background:#5fa88f;"></span><span class="name">loan_payments</span></div>
+    <p class="table-note">Fiecare returnare de bani (parțială sau totală) pentru un împrumut.</p>
+    <table>
+      <thead><tr><th>Coloană</th><th>Tip</th><th>Descriere</th></tr></thead>
+      <tbody>
+        <tr><td class="col">id<span class="pk">PK</span></td><td class="typ">uuid</td><td class="desc">generat automat</td></tr>
+        <tr><td class="col">loan_id<span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">împrumutul (→ loans, șters în cascadă)</td></tr>
+        <tr><td class="col">user_id<span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">proprietarul</td></tr>
+        <tr><td class="col">amount</td><td class="typ">numeric(12,2)</td><td class="desc">cât a returnat</td></tr>
+        <tr><td class="col">date</td><td class="typ">date</td><td class="desc">când a returnat</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="table-title"><span class="dot" style="background:#b57bb0;"></span><span class="name">settings</span></div>
+    <p class="table-note">Setările fiecărui utilizator — un singur rând per cont.</p>
+    <table>
+      <thead><tr><th>Coloană</th><th>Tip</th><th>Descriere</th></tr></thead>
+      <tbody>
+        <tr><td class="col">user_id<span class="pk">PK</span><span class="fk">FK</span></td><td class="typ">uuid</td><td class="desc">contul (→ auth.users)</td></tr>
+        <tr><td class="col">starting_balance</td><td class="typ">numeric(12,2)</td><td class="desc">soldul de pornire (economiile existente)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2><span class="num">03</span>Scriptul SQL complet</h2>
+  <p class="h2-sub">Copiază tot și rulează-l o singură dată în SQL Editor. Include tabelele, indexurile și securitatea pe rânduri (RLS).</p>
+
+  <div class="callout"><div><b>De ce contează RLS:</b> fără Row Level Security, orice utilizator autentificat ar putea citi datele tuturor. Politicile de mai jos garantează că fiecare om își vede doar propriile rânduri.</div></div>
+
+  <div class="code-wrap">
+    <button class="copy-btn" onclick="copySql(this)">Copiază</button>
+<pre id="sql"><span class="c">-- ============================================
+-- BaniBine · Schema completă pentru Supabase
+-- Rulează o singură dată în SQL Editor
+-- ============================================</span>
+
+<span class="c">-- 1) Tranzacții (venituri + cheltuieli)</span>
+<span class="k">create table</span> transactions (
+  id          uuid <span class="k">primary key default</span> gen_random_uuid(),
+  user_id     uuid <span class="k">not null references</span> auth.users(id) <span class="k">on delete cascade</span>,
+  type        text <span class="k">not null check</span> (type <span class="k">in</span> (<span class="s">'income'</span>, <span class="s">'expense'</span>)),
+  amount      numeric(12,2) <span class="k">not null check</span> (amount &gt; 0),
+  category    text <span class="k">not null</span>,
+  description text,
+  date        date <span class="k">not null default</span> current_date,
+  created_at  timestamptz <span class="k">not null default</span> now()
+);
+
+<span class="c">-- 2) Obiective de economisire</span>
+<span class="k">create table</span> goals (
+  id         uuid <span class="k">primary key default</span> gen_random_uuid(),
+  user_id    uuid <span class="k">not null references</span> auth.users(id) <span class="k">on delete cascade</span>,
+  name       text <span class="k">not null</span>,
+  target     numeric(12,2) <span class="k">not null check</span> (target &gt; 0),
+  saved      numeric(12,2) <span class="k">not null default</span> 0,
+  color      text <span class="k">default</span> <span class="s">'#d97757'</span>,
+  deadline   date,
+  created_at timestamptz <span class="k">not null default</span> now()
+);
+
+<span class="c">-- 3) Bugete lunare pe categorie</span>
+<span class="k">create table</span> budgets (
+  id       uuid <span class="k">primary key default</span> gen_random_uuid(),
+  user_id  uuid <span class="k">not null references</span> auth.users(id) <span class="k">on delete cascade</span>,
+  category text <span class="k">not null</span>,
+  amount   numeric(12,2) <span class="k">not null check</span> (amount &gt;= 0),
+  <span class="k">unique</span> (user_id, category)
+);
+
+<span class="c">-- 4) Împrumuturi date</span>
+<span class="k">create table</span> loans (
+  id         uuid <span class="k">primary key default</span> gen_random_uuid(),
+  user_id    uuid <span class="k">not null references</span> auth.users(id) <span class="k">on delete cascade</span>,
+  person     text <span class="k">not null</span>,
+  amount     numeric(12,2) <span class="k">not null check</span> (amount &gt; 0),
+  note       text,
+  date       date <span class="k">not null default</span> current_date,
+  created_at timestamptz <span class="k">not null default</span> now()
+);
+
+<span class="c">-- 5) Plăți primite pentru împrumuturi</span>
+<span class="k">create table</span> loan_payments (
+  id      uuid <span class="k">primary key default</span> gen_random_uuid(),
+  loan_id uuid <span class="k">not null references</span> loans(id) <span class="k">on delete cascade</span>,
+  user_id uuid <span class="k">not null references</span> auth.users(id) <span class="k">on delete cascade</span>,
+  amount  numeric(12,2) <span class="k">not null check</span> (amount &gt; 0),
+  date    date <span class="k">not null default</span> current_date
+);
+
+<span class="c">-- 6) Setări per utilizator</span>
+<span class="k">create table</span> settings (
+  user_id          uuid <span class="k">primary key references</span> auth.users(id) <span class="k">on delete cascade</span>,
+  starting_balance numeric(12,2) <span class="k">not null default</span> 0
+);
+
+<span class="c">-- Indexuri pentru interogări rapide</span>
+<span class="k">create index</span> idx_tx_user_date <span class="k">on</span> transactions (user_id, date <span class="k">desc</span>);
+<span class="k">create index</span> idx_goals_user <span class="k">on</span> goals (user_id);
+<span class="k">create index</span> idx_budgets_user <span class="k">on</span> budgets (user_id);
+<span class="k">create index</span> idx_loans_user <span class="k">on</span> loans (user_id);
+<span class="k">create index</span> idx_loan_payments_loan <span class="k">on</span> loan_payments (loan_id);
+
+<span class="c">-- ============================================
+-- Row Level Security: fiecare își vede DOAR datele lui
+-- ============================================</span>
+<span class="k">alter table</span> transactions  <span class="k">enable row level security</span>;
+<span class="k">alter table</span> goals         <span class="k">enable row level security</span>;
+<span class="k">alter table</span> budgets       <span class="k">enable row level security</span>;
+<span class="k">alter table</span> loans         <span class="k">enable row level security</span>;
+<span class="k">alter table</span> loan_payments <span class="k">enable row level security</span>;
+<span class="k">alter table</span> settings      <span class="k">enable row level security</span>;
+
+<span class="k">create policy</span> <span class="s">"datele mele"</span> <span class="k">on</span> transactions
+  <span class="k">for all using</span> (auth.uid() = user_id) <span class="k">with check</span> (auth.uid() = user_id);
+
+<span class="k">create policy</span> <span class="s">"datele mele"</span> <span class="k">on</span> goals
+  <span class="k">for all using</span> (auth.uid() = user_id) <span class="k">with check</span> (auth.uid() = user_id);
+
+<span class="k">create policy</span> <span class="s">"datele mele"</span> <span class="k">on</span> budgets
+  <span class="k">for all using</span> (auth.uid() = user_id) <span class="k">with check</span> (auth.uid() = user_id);
+
+<span class="k">create policy</span> <span class="s">"datele mele"</span> <span class="k">on</span> loans
+  <span class="k">for all using</span> (auth.uid() = user_id) <span class="k">with check</span> (auth.uid() = user_id);
+
+<span class="k">create policy</span> <span class="s">"datele mele"</span> <span class="k">on</span> loan_payments
+  <span class="k">for all using</span> (auth.uid() = user_id) <span class="k">with check</span> (auth.uid() = user_id);
+
+<span class="k">create policy</span> <span class="s">"datele mele"</span> <span class="k">on</span> settings
+  <span class="k">for all using</span> (auth.uid() = user_id) <span class="k">with check</span> (auth.uid() = user_id);</pre>
+  </div>
+
+  <h2><span class="num">04</span>Cum se leagă de aplicație</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>În aplicație</th><th>În baza de date</th></tr></thead>
+      <tbody>
+        <tr><td>Panou, Tranzacții, grafice</td><td class="typ">transactions</td></tr>
+        <tr><td>Obiective + „Adaugă bani”</td><td class="typ">goals</td></tr>
+        <tr><td>Buget lunar pe categorie</td><td class="typ">budgets</td></tr>
+        <tr><td>Împrumuturi (carduri per persoană)</td><td class="typ">loans</td></tr>
+        <tr><td>„A returnat bani” + istoricul plăților</td><td class="typ">loan_payments</td></tr>
+        <tr><td>Soldul de pornire din Panou</td><td class="typ">settings</td></tr>
+        <tr><td>Conturile (email + parolă)</td><td class="typ">auth.users — gestionat automat de Supabase</td></tr>
+      </tbody>
+    </table>
+    <p class="table-note" style="margin-top:14px;"><b>Notă:</b> momentan aplicația salvează datele în browser (localStorage). Următorul pas, când vrei, e să conectez citirea/scrierea direct la aceste tabele — schema e deja pregătită pentru asta.</p>
+  </div>
+</div>
+
+<script>
+  function copySql(btn) {
+    const text = document.getElementById("sql").innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = "Copiat ✓";
+      setTimeout(() => { btn.textContent = "Copiază"; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>

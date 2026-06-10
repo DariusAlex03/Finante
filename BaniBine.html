@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BaniBine — Gestionează-ți banii</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --surface: #ffffff;
+    --ink: #211e1a;
+    --muted: #8c857b;
+    --border: #ece7df;
+    --accent: #d97757;
+    --accent-dark: #c5613f;
+    --income: #2f9e6b;
+    --expense: #d9605a;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "tnum" 0;
+  }
+  #root { min-height: 100vh; }
+  .mono, [style*="--mono"] { font-variant-numeric: tabular-nums; }
+
+  h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; }
+
+  .nav-item:hover { background: var(--bg) !important; color: var(--ink) !important; }
+  .nav-item[style*="var(--accent)"]:hover { background: var(--accent-dark) !important; color: #fff !important; }
+
+  .link-btn {
+    display: inline-flex; align-items: center; gap: 3px; border: none; background: transparent;
+    color: var(--accent); font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; padding: 4px;
+  }
+  .link-btn:hover { color: var(--accent-dark); }
+
+  .del-btn:hover { background: #f5e8e5 !important; color: var(--expense) !important; }
+  .icon-btn:hover { background: var(--border) !important; }
+  .tx-row { transition: background .12s; border-radius: 10px; }
+  .tx-row:hover { background: var(--bg); }
+
+  input::placeholder { color: #b8b2a8; }
+  input:focus { border-color: var(--accent) !important; }
+
+  /* Slider */
+  .slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 99px; background: var(--border); outline: none; cursor: pointer; }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(217,119,87,.4);
+    transition: transform .1s;
+  }
+  .slider::-webkit-slider-thumb:hover { transform: scale(1.12); }
+  .slider::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent); cursor: pointer;
+    border: 3px solid #fff; box-shadow: 0 2px 6px rgba(217,119,87,.4);
+  }
+
+  select:focus { border-color: var(--accent) !important; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #ddd6cb; border-radius: 99px; border: 3px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: #ccc3b5; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-helper.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="views.jsx"></script>
+<script type="text/babel" src="views2.jsx"></script>
+<script type="text/babel" src="loans.jsx"></script>
+<script type="text/babel" src="calculator.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

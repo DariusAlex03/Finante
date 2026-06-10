@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BaniBine — Autentificare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --surface: #ffffff;
+    --ink: #211e1a;
+    --muted: #8c857b;
+    --border: #ece7df;
+    --accent: #d97757;
+    --accent-dark: #c5613f;
+    --income: #2f9e6b;
+    --expense: #d9605a;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { display: flex; min-height: 100vh; }
+
+  /* ---- panou brand stânga ---- */
+  .brand-panel {
+    flex: 1; background: linear-gradient(150deg, #d97757 0%, #c5613f 60%, #b04f30 100%);
+    color: #fff; padding: 56px; display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .brand-panel::after {
+    content: ""; position: absolute; right: -120px; bottom: -120px;
+    width: 420px; height: 420px; border-radius: 50%;
+    background: rgba(255,255,255,.07);
+  }
+  .brand-panel::before {
+    content: ""; position: absolute; right: 40px; bottom: 60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: rgba(255,255,255,.06);
+  }
+  .logo-row { display: flex; align-items: center; gap: 12px; }
+  .logo-badge {
+    width: 44px; height: 44px; border-radius: 13px; background: rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-name { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
+  .tagline { max-width: 420px; position: relative; z-index: 1; }
+  .tagline h1 { font-size: 38px; font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin: 0 0 16px; }
+  .tagline p { font-size: 15.5px; line-height: 1.6; opacity: .9; margin: 0; }
+  .privacy-note { display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: .85; position: relative; z-index: 1; }
+
+  /* ---- formular dreapta ---- */
+  .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+  .form-card { width: 100%; max-width: 400px; }
+  .form-card h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 6px; }
+  .form-card .sub { font-size: 14px; color: var(--muted); margin: 0 0 28px; }
+
+  .tabs { display: flex; gap: 8px; background: #ece7df; padding: 4px; border-radius: 13px; margin-bottom: 24px; }
+  .tabs button {
+    flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 14px; color: var(--muted); background: transparent;
+    transition: all .15s;
+  }
+  .tabs button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+  label { font-size: 12.5px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 7px; }
+  input {
+    width: 100%; padding: 12px 14px; border-radius: 11px; border: 1px solid var(--border);
+    font-size: 15px; font-family: inherit; background: var(--surface); color: var(--ink); outline: none;
+    margin-bottom: 16px;
+  }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #b8b2a8; }
+
+  .btn-primary {
+    width: 100%; padding: 13px; border-radius: 12px; border: none; cursor: pointer;
+    background: var(--accent); color: #fff; font-family: inherit; font-weight: 700; font-size: 15px;
+    transition: background .15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-primary:disabled { opacity: .6; cursor: wait; }
+
+  .msg { padding: 12px 14px; border-radius: 11px; font-size: 13.5px; line-height: 1.5; margin-bottom: 16px; display: none; }
+  .msg.err { background: #fbeae8; color: #a8423c; display: block; }
+  .msg.ok { background: #e7f5ee; color: #20714c; display: block; }
+
+  .config-note {
+    margin-top: 24px; padding: 16px; border-radius: 13px; background: var(--surface);
+    border: 1px dashed var(--border); font-size: 13px; color: var(--muted); line-height: 1.6;
+  }
+  .config-note b { color: var(--ink); }
+  .config-note a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .config-note a:hover { text-decoration: underline; }
+  .config-note code { font-family: var(--mono); font-size: 12px; background: var(--bg); padding: 1px 6px; border-radius: 5px; color: var(--ink); }
+
+  .btn-demo {
+    width: 100%; margin-top: 12px; padding: 12px; border-radius: 12px; cursor: pointer;
+    background: transparent; border: 1px solid var(--border); color: var(--ink);
+    font-family: inherit; font-weight: 600; font-size: 14px; transition: background .15s;
+  }
+  .btn-demo:hover { background: var(--surface); }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 99px;
+    font-size: 12px; font-weight: 700; margin-bottom: 20px;
+  }
+  .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .status-pill.on { background: #e7f5ee; color: #20714c; }
+  .status-pill.on .dot { background: #2f9e6b; }
+  .status-pill.off { background: #f7efe0; color: #9a6d1f; }
+  .status-pill.off .dot { background: #d9a456; }
+
+  @media (max-width: 860px) { .brand-panel { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="brand-panel">
+    <div class="logo-row">
+      <div class="logo-badge">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9m-6 0a6 3 0 1 0 12 0a6 3 0 1 0-12 0M3 9v5c0 1.7 2.7 3 6 3M21 12v5c0 1.7-2.7 3-6 3M15 6m-6 0a6 3 0 1 0 12 0a6 3 0 1 0-12 0"></path></svg>
+      </div>
+      <span class="brand-name">BaniBine</span>
+    </div>
+
+    <div class="tagline">
+      <h1>Banii tăi, sub control. Privat.</h1>
+      <p>Venituri, cheltuieli, bugete, obiective și împrumuturi — totul într-un singur loc, vizibil doar pentru tine după autentificare.</p>
+    </div>
+
+    <div class="privacy-note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      Date criptate &amp; protejate cu Supabase Auth
+    </div>
+  </aside>
+
+  <main class="form-panel">
+    <div class="form-card">
+      <div id="status-pill" class="status-pill off"><span class="dot"></span><span id="status-text">Supabase neconfigurat — mod demo</span></div>
+
+      <h2 id="form-title">Bine ai revenit</h2>
+      <p class="sub" id="form-sub">Intră în contul tău ca să-ți vezi finanțele.</p>
+
+      <div class="tabs">
+        <button id="tab-login" class="active" onclick="setMode('login')">Autentificare</button>
+        <button id="tab-signup" onclick="setMode('signup')">Cont nou</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+
+      <form id="auth-form" onsubmit="return submitAuth(event)">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="nume@email.com" autocomplete="email" required />
+
+        <label for="password">Parolă</label>
+        <input id="password" type="password" placeholder="minim 6 caractere" autocomplete="current-password" required minlength="6" />
+
+        <div id="confirm-wrap" style="display:none;">
+          <label for="password2">Confirmă parola</label>
+          <input id="password2" type="password" placeholder="încă o dată" autocomplete="new-password" />
+        </div>
+
+        <button id="submit-btn" type="submit" class="btn-primary">Intră în cont</button>
+      </form>
+
+      <div id="demo-block">
+        <button class="btn-demo" onclick="enterDemo()">Continuă în mod demo (fără cont)</button>
+        <div class="config-note">
+          <b>Conectează Supabase:</b> creează un proiect pe supabase.com, rulează SQL-ul din
+          <a href="Schema Supabase.html">ghidul cu schema bazei de date</a>, apoi pune URL-ul și cheia
+          <code>anon</code> în <code>supabase-config.js</code>. Pagina va folosi automat conturi reale.
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth-helper.js"></script>
+<script>
+  let mode = "login";
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById("tab-login").classList.toggle("active", m === "login");
+    document.getElementById("tab-signup").classList.toggle("active", m === "signup");
+    document.getElementById("form-title").textContent = m === "login" ? "Bine ai revenit" : "Creează-ți cont";
+    document.getElementById("form-sub").textContent = m === "login" ? "Intră în contul tău ca să-ți vezi finanțele." : "Durează 30 de secunde. Doar email și parolă.";
+    document.getElementById("confirm-wrap").style.display = m === "signup" ? "block" : "none";
+    document.getElementById("submit-btn").textContent = m === "login" ? "Intră în cont" : "Creează contul";
+    showMsg("", "");
+  }
+
+  function showMsg(text, kind) {
+    const el = document.getElementById("msg");
+    el.className = "msg" + (kind ? " " + kind : "");
+    el.textContent = text;
+  }
+
+  function trErr(e) {
+    const m = (e && e.message) || "";
+    if (m.includes("Invalid login credentials")) return "Email sau parolă greșite.";
+    if (m.includes("already registered")) return "Există deja un cont cu acest email.";
+    if (m.includes("at least 6")) return "Parola trebuie să aibă minim 6 caractere.";
+    if (m.includes("confirm")) return "Verifică-ți emailul pentru linkul de confirmare.";
+    return m || "A apărut o eroare. Încearcă din nou.";
+  }
+
+  async function submitAuth(ev) {
+    ev.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value;
+
+    if (!BBAuth.configured()) {
+      // mod demo: orice email/parolă funcționează
+      BBAuth.demoLogin(email);
+      location.href = "BaniBine.html";
+      return false;
+    }
+
+    if (mode === "signup" && pass !== document.getElementById("password2").value) {
+      showMsg("Parolele nu coincid.", "err");
+      return false;
+    }
+
+    const btn = document.getElementById("submit-btn");
+    btn.disabled = true;
+    try {
+      if (mode === "login") {
+        await BBAuth.signIn(email, pass);
+        location.href = "BaniBine.html";
+      } else {
+        const data = await BBAuth.signUp(email, pass);
+        if (data.session) {
+          location.href = "BaniBine.html";
+        } else {
+          showMsg("Cont creat! Verifică-ți emailul pentru linkul de confirmare, apoi autentifică-te.", "ok");
+          setMode("login");
+        }
+      }
+    } catch (e) {
+      showMsg(trErr(e), "err");
+    }
+    btn.disabled = false;
+    return false;
+  }
+
+  function enterDemo() {
+    BBAuth.demoLogin("demo@banibine.ro");
+    location.href = "BaniBine.html";
+  }
+
+  // status pill + dacă e deja logat, intră direct
+  (async function init() {
+    const pill = document.getElementById("status-pill");
+    if (BBAuth.configured()) {
+      pill.className = "status-pill on";
+      document.getElementById("status-text").textContent = "Conectat la Supabase";
+      document.getElementById("demo-block").style.display = "none";
+    }
+    const user = await BBAuth.getUser();
+    if (user) location.href = "BaniBine.html";
+  })();
+</script>
+</body>
+</html>

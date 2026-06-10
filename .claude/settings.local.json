@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.anthropic.com)",
+      "PowerShell(Out-File *)",
+      "PowerShell($content = Get-Content \"C:\\\\Users\\\\dariu\\\\OneDrive\\\\Desktop\\\\site finante\\\\_design_extracted.txt\" -Raw -Encoding utf8; $files = [System.Text.RegularExpressions.Regex]::Matches\\($content, 'site-perso/project/\\([^\\\\s]+\\\\.\\(?:js|jsx|html|css\\)\\)'\\); $files | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)"
+    ]
+  }
+}
